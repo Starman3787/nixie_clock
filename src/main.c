@@ -1,6 +1,13 @@
+#include <stdbool.h>
+#include <stdint.h>
 #include "src/drivers/onboard_led/onboard_led.h"
 #include "src/drivers/nixie/nixie.h"
 #include "src/drivers/ds3231/ds3231.h"
+#include "src/drivers/rgb_led/rgb_led.h"
+#include "src/drivers/pulse/pulse.h"
+#include "src/drivers/option_switch/option_switch.h"
+#include "src/drivers/mode_switch/mode_switch.h"
+#include "src/util/check_input/check_input.h"
 
 void main(void)
 {
@@ -10,79 +17,79 @@ void main(void)
 
     Ds3231_Init();
 
+    Pulse_Init();
+
+    RgbLed_Init();
+
+    OptionSwitch_Init();
+
+    ModeSwitch_Init();
+
+    uint16_t rgb[3] = {0, 0, 1000};
+    uint8_t changing = 0;
+    uint8_t previousChanging = 2;
+
+    Nixie_Scramble(true);
+
     while (1)
     {
-        char dataSeconds;
-        Ds3231_Read(0x00, &dataSeconds);
-        Nixie_Display(0, 0);
-        Nixie_Display(1, 0);
-        Nixie_Display(2, 0);
-        Nixie_Display(3, 0);
-        Nixie_Display(4, 0);
-        Nixie_Display(5, 0);
-        for (long i = 0; i < 1000000; i++);
-        Nixie_Display(0, 1);
-        Nixie_Display(1, 1);
-        Nixie_Display(2, 1);
-        Nixie_Display(3, 1);
-        Nixie_Display(4, 1);
-        Nixie_Display(5, 1);
-        for (long i = 0; i < 1000000; i++);
-        Nixie_Display(0, 2);
-        Nixie_Display(1, 2);
-        Nixie_Display(2, 2);
-        Nixie_Display(3, 2);
-        Nixie_Display(4, 2);
-        Nixie_Display(5, 2);
-        for (long i = 0; i < 1000000; i++);
-        Nixie_Display(0, 3);
-        Nixie_Display(1, 3);
-        Nixie_Display(2, 3);
-        Nixie_Display(3, 3);
-        Nixie_Display(4, 3);
-        Nixie_Display(5, 3);
-        for (long i = 0; i < 1000000; i++);
-        Nixie_Display(0, 4);
-        Nixie_Display(1, 4);
-        Nixie_Display(2, 4);
-        Nixie_Display(3, 4);
-        Nixie_Display(4, 4);
-        Nixie_Display(5, 4);
-        for (long i = 0; i < 1000000; i++);
-        Nixie_Display(0, 5);
-        Nixie_Display(1, 5);
-        Nixie_Display(2, 5);
-        Nixie_Display(3, 5);
-        Nixie_Display(4, 5);
-        Nixie_Display(5, 5);
-        for (long i = 0; i < 1000000; i++);
-        Nixie_Display(0, 6);
-        Nixie_Display(1, 6);
-        Nixie_Display(2, 6);
-        Nixie_Display(3, 6);
-        Nixie_Display(4, 6);
-        Nixie_Display(5, 6);
-        for (long i = 0; i < 1000000; i++);
-        Nixie_Display(0, 7);
-        Nixie_Display(1, 7);
-        Nixie_Display(2, 7);
-        Nixie_Display(3, 7);
-        Nixie_Display(4, 7);
-        Nixie_Display(5, 7);
-        for (long i = 0; i < 1000000; i++);
-        Nixie_Display(0, 8);
-        Nixie_Display(1, 8);
-        Nixie_Display(2, 8);
-        Nixie_Display(3, 8);
-        Nixie_Display(4, 8);
-        Nixie_Display(5, 8);
-        for (long i = 0; i < 1000000; i++);
-        Nixie_Display(0, 9);
-        Nixie_Display(1, 9);
-        Nixie_Display(2, 9);
-        Nixie_Display(3, 9);
-        Nixie_Display(4, 9);
-        Nixie_Display(5, 9);
-        for (long i = 0; i < 1000000; i++);
+        int8_t hours, minutes, seconds;
+
+        Ds3231_GetTime(&hours, &minutes, &seconds);
+
+        Nixie_Display(0, hours / 10);
+        Nixie_Display(1, hours % 10);
+        Nixie_Display(2, minutes / 10);
+        Nixie_Display(3, minutes % 10);
+        Nixie_Display(4, seconds / 10);
+        Nixie_Display(5, seconds % 10);
+
+        if (seconds % 2 == 0)
+            Pulse_Write(true);
+        else
+            Pulse_Write(false);
+
+        rgb[changing] += 10;
+        rgb[previousChanging] -= 10;
+
+        if (rgb[changing] == 1000)
+        {
+            previousChanging = changing;
+            if (++changing > 2)
+                changing = 0;
+            rgb[changing] = 0;
+            rgb[previousChanging] = 1000;
+        }
+
+        RgbLed_SetRgb(rgb[0], rgb[1], rgb[2]);
+
+        uint8_t mode, option;
+        bool modeDefined = false, optionDefined = false;
+
+        Util_CheckInput(&mode, &option, &modeDefined, &optionDefined);
+
+        if (modeDefined == true && optionDefined == true)
+        {
+            switch (mode) {
+                case 0:
+                // hours
+                Ds3231_SetHours(option + 12);
+                break;
+                case 1:
+                // minutes
+                Ds3231_SetMinutes(option * 5);
+                break;
+                case 2:
+                // seconds
+                Ds3231_SetSeconds(option * 5);
+                break;
+            }
+        }
+
+        if (minutes % 15 == 0 && seconds == 0 && modeDefined == false)
+            Nixie_Scramble(false);
+
+        for (uint32_t i = 0; i < 100000; i++);
+
     }
 }

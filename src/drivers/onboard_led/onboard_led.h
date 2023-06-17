@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define ONBOARDLED_PIN_0        (13)
+#define ONBOARDLED_PIN_0        (0)
 
 int8_t OnboardLed_Init(void);
 int8_t OnboardLed_Write(bool state);

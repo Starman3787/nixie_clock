@@ -1,8 +1,8 @@
 TARGET = main
 
 # Define the linker script location and chip architecture
-LD_SCRIPT	= link/stm32f411ce.ld
-MCU_SPEC	= cortex-m7
+LD_SCRIPT	= link/stm32f412zgtx.ld
+MCU_SPEC	= cortex-m4
 
 # Toolchain definitions (ARM bare metal defaults)
 TOOLCHAIN	= /usr
@@ -36,7 +36,7 @@ CFLAGS += -DSYSTEM_DEBUG__
 CFLAGS += -fmessage-length=0
 # (Set system to ignore semihosted junk)
 CFLAGS += --specs=nosys.specs
-CFLAGS += -DSTM32F767xx
+CFLAGS += -DSTM32H7A3xxQ
 CFLAGS += -Wno-main
 CFLAGS += -Wno-sequence-point
 CFLAGS += -Wno-unused-but-set-variable
@@ -57,6 +57,11 @@ C_SRC = ./src/main.c
 C_SRC += ./src/drivers/ds3231/ds3231.c
 C_SRC += ./src/drivers/nixie/nixie.c
 C_SRC += ./src/drivers/onboard_led/onboard_led.c
+C_SRC += ./src/drivers/rgb_led/rgb_led.c
+C_SRC += ./src/drivers/pulse/pulse.c
+C_SRC += ./src/drivers/mode_switch/mode_switch.c
+C_SRC += ./src/drivers/option_switch/option_switch.c
+C_SRC += ./src/util/check_input/check_input.c
 
 INCLUDE = -I.
 
