@@ -4,6 +4,7 @@
 
 int8_t OptionSwitch_Init(void)
 {
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
 
     GPIOC->MODER &= ~(0b11 << (OPTIONSWITCH_OPT_0 * 2)) &
