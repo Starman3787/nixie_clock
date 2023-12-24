@@ -27,7 +27,7 @@ int8_t Ds3231_Init(void)
 
     I2C2->CCR = 0x50;
 
-    I2C2->TRISE = 0x11;
+    I2C2->TRISE = 0x10;
 
     I2C2->CR1 |= I2C_CR1_PE;
 
