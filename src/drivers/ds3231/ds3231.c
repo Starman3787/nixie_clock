@@ -19,9 +19,6 @@ int8_t Ds3231_Init(void)
     GPIOF->OSPEEDR |= (0b11 << (DS3231_PIN_CL * 2)) |
                         (0b11 << (DS3231_PIN_DA * 2));
 
-    GPIOF->PUPDR |= (0b01 << (DS3231_PIN_CL * 2)) |
-                        (0b01 << (DS3231_PIN_DA * 2));
-
     I2C2->CR1 = I2C_CR1_SWRST;
 
     I2C2->CR1 &= ~I2C_CR1_SWRST;
