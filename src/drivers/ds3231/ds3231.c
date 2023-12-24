@@ -23,7 +23,6 @@ int8_t Ds3231_Init(void)
 
     I2C2->CR1 &= ~I2C_CR1_SWRST;
 
-    I2C2->CR2 |= I2C_CR2_ITERREN;
     I2C2->CR2 |= 0x10;
 
     I2C2->CCR = 0x50;
